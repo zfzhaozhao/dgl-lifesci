@@ -21,7 +21,7 @@ try:
     from rdkit.Chem import AllChem, ChemicalFeatures
 except ImportError:
     pass
-
+#Python 模块的 __all__ 列表。__all__ 是一个特殊的变量，用于定义当使用 from module import * 语法时，模块中应该暴露给用户的对象或函数的名称。也就是说，__all__ 列表中列出的名字是模块的公开接口
 __all__ = ['one_hot_encoding',
            'atom_type_one_hot',
            'atomic_number_one_hot',
@@ -82,7 +82,7 @@ def one_hot_encoding(x, allowable_set, encode_unknown=False):
         same type as x.
     encode_unknown : bool
         If True, map inputs not in the allowable set to the
-        additional last element.
+        additional last element.  #这个是指用于映射那些不再list中的元素，若为True 就自己在末尾增添一个维度，那这样，就不能保证每个节点的维度一致了呀
 
     Returns
     -------
@@ -101,7 +101,7 @@ def one_hot_encoding(x, allowable_set, encode_unknown=False):
     >>> one_hot_encoding('S', ['C', 'O'], encode_unknown=True)
     [False, False, True]
     """
-    if encode_unknown and (allowable_set[-1] is not None):
+    if encode_unknown and (allowable_set[-1] is not None):  #这种方式保证维度一致
         allowable_set.append(None)
 
     if encode_unknown and (x not in allowable_set):
@@ -113,7 +113,7 @@ def one_hot_encoding(x, allowable_set, encode_unknown=False):
 # Atom featurization
 #################################################################
 
-def atom_type_one_hot(atom, allowable_set=None, encode_unknown=False):
+def atom_type_one_hot(atom, allowable_set=None, encode_unknown=False): #看来一般他是不管超出规定集的东西的
     """One hot encoding for the type of an atom.
 
     Parameters
@@ -147,6 +147,7 @@ def atom_type_one_hot(atom, allowable_set=None, encode_unknown=False):
                          'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn', 'H', 'Li', 'Ge', 'Cu', 'Au',
                          'Ni', 'Cd', 'In', 'Mn', 'Zr', 'Cr', 'Pt', 'Hg', 'Pb']
     return one_hot_encoding(atom.GetSymbol(), allowable_set, encode_unknown)
+#atom.GetSymbol() 是 RDKit（一个化学信息学工具包）中 Atom 对象的一个方法，用于获取原子的化学符号。
 
 def atomic_number_one_hot(atom, allowable_set=None, encode_unknown=False):
     """One hot encoding for the atomic number of an atom.
@@ -175,6 +176,7 @@ def atomic_number_one_hot(atom, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = list(range(1, 101))
     return one_hot_encoding(atom.GetAtomicNum(), allowable_set, encode_unknown)
+    #GetAtomicNum() 是 RDKit 中 Atom 类的一个方法，用于获取原子的原子序数
 
 def atomic_number(atom):
     """Get the atomic number for an atom.
@@ -194,7 +196,7 @@ def atomic_number(atom):
     atomic_number_one_hot
     atom_type_one_hot
     """
-    return [atom.GetAtomicNum()]
+    return [atom.GetAtomicNum()] #atom.GetAtomicNum() 是 RDKit（一个化学信息学工具包）中的一个方法，用于获取一个原子的原子序数（atomic number）
 
 def atom_degree_one_hot(atom, allowable_set=None, encode_unknown=False):
     """One hot encoding for the degree of an atom.
@@ -275,7 +277,7 @@ def atom_total_degree_one_hot(atom, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = list(range(6))
     return one_hot_encoding(atom.GetTotalDegree(), allowable_set, encode_unknown)
-
+#atom.GetTotalDegree() 是 RDKit 中 Atom 类的一个方法，用于获取一个原子的总连接度（total degree）。连接度是指一个原子通过化学键直接连接到其他原子的数量。
 def atom_total_degree(atom):
     """The degree of an atom including Hs.
 
@@ -318,7 +320,7 @@ def atom_explicit_valence_one_hot(atom, allowable_set=None, encode_unknown=False
     if allowable_set is None:
         allowable_set = list(range(1, 7))
     return one_hot_encoding(atom.GetExplicitValence(), allowable_set, encode_unknown)
-
+#显式价态更强调通过化学键连接的原子数，而连接度则强调与原子直接相连的原子数量。
 def atom_explicit_valence(atom):
     """Get the explicit valence of an atom.
 
@@ -336,7 +338,7 @@ def atom_explicit_valence(atom):
     --------
     atom_explicit_valence_one_hot
     """
-    return [atom.GetExplicitValence()]
+    return [atom.GetExplicitValence()]  #atom.GetExplicitValence() 方法用于获取原子的显式价态
 
 def atom_implicit_valence_one_hot(atom, allowable_set=None, encode_unknown=False):
     """One hot encoding for the implicit valence of an atom.
@@ -363,7 +365,8 @@ def atom_implicit_valence_one_hot(atom, allowable_set=None, encode_unknown=False
     if allowable_set is None:
         allowable_set = list(range(7))
     return one_hot_encoding(atom.GetImplicitValence(), allowable_set, encode_unknown)
-
+#atom.GetImplicitValence() 是 RDKit 中 Atom 类的一个方法，用于获取原子的隐式价态（implicit valence）。
+#隐式价态指的是一个原子通过隐含的氢原子或其他未明确显示的连接所填补的价电子空缺。
 def atom_implicit_valence(atom):
     """Get the implicit valence of an atom.
 
@@ -409,13 +412,13 @@ def atom_hybridization_one_hot(atom, allowable_set=None, encode_unknown=False):
     one_hot_encoding
     """
     if allowable_set is None:
-        allowable_set = [Chem.rdchem.HybridizationType.SP,
-                         Chem.rdchem.HybridizationType.SP2,
-                         Chem.rdchem.HybridizationType.SP3,
-                         Chem.rdchem.HybridizationType.SP3D,
-                         Chem.rdchem.HybridizationType.SP3D2]
+        allowable_set = [Chem.rdchem.HybridizationType.SP,               #线性杂化（sp）。
+                         Chem.rdchem.HybridizationType.SP2,              #平面三角形杂化（sp²）
+                         Chem.rdchem.HybridizationType.SP3,              #四面体杂化（sp³）
+                         Chem.rdchem.HybridizationType.SP3D,             #五面体杂化（sp³d），虽然在有机分子中不常见
+                         Chem.rdchem.HybridizationType.SP3D2]            #八面体杂化（sp³d²），也在有机化学中较少见
     return one_hot_encoding(atom.GetHybridization(), allowable_set, encode_unknown)
-
+#用于获取原子的杂化状态（hybridization）。杂化状态描述了原子中价电子轨道的混合方式，从而决定了原子如何形成化学键和其几何形状。
 def atom_total_num_H_one_hot(atom, allowable_set=None, encode_unknown=False):
     """One hot encoding for the total number of Hs of an atom.
 
@@ -442,6 +445,7 @@ def atom_total_num_H_one_hot(atom, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = list(range(5))
     return one_hot_encoding(atom.GetTotalNumHs(), allowable_set, encode_unknown)
+#获取一个原子的总氢原子数（包括隐式氢）。
 
 def atom_total_num_H(atom):
     """Get the total number of Hs of an atom.
@@ -488,7 +492,7 @@ def atom_formal_charge_one_hot(atom, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = list(range(-2, 3))
     return one_hot_encoding(atom.GetFormalCharge(), allowable_set, encode_unknown)
-
+#获取一个原子的形式电荷（formal charge）。形式电荷是用于描述原子在化学结构中实际带有的电荷量的一种方式。
 def atom_formal_charge(atom):
     """Get formal charge for an atom.
 
@@ -513,7 +517,8 @@ def atom_partial_charge(atom):
 
     For using this function, you must have called ``AllChem.ComputeGasteigerCharges(mol)``
     to compute Gasteiger charges.
-
+#在 RDKit 中，Gasteiger 充电（Gasteiger charges）是计算分子中每个原子的电荷分布的一种方法。
+#这种方法基于分子的结构和原子的电子环境，提供了原子的电荷信息，帮助理解分子中的电荷分布情况。
     Occasionally, we can get nan or infinity Gasteiger charges, in which case we will set
     the result to be 0.
 
@@ -531,6 +536,8 @@ def atom_partial_charge(atom):
     if gasteiger_charge in ['-nan', 'nan', '-inf', 'inf']:
         gasteiger_charge = 0
     return [float(gasteiger_charge)]
+#atom 对象中获取 _GasteigerCharge 属性的值。这个属性是在调用 AllChem.ComputeGasteigerCharges(mol) 后计算并存储在原子对象中的，用于表示 Gasteiger 电荷。
+
 
 def atom_num_radical_electrons_one_hot(atom, allowable_set=None, encode_unknown=False):
     """One hot encoding for the number of radical electrons of an atom.
@@ -558,7 +565,7 @@ def atom_num_radical_electrons_one_hot(atom, allowable_set=None, encode_unknown=
     if allowable_set is None:
         allowable_set = list(range(5))
     return one_hot_encoding(atom.GetNumRadicalElectrons(), allowable_set, encode_unknown)
-
+#用于获取原子上的自由基电子数（radical electrons）。自由基电子是指原子上不成对的电子，这些电子参与了自由基的形成，并对分子的反应性有重要影响。
 def atom_num_radical_electrons(atom):
     """Get the number of radical electrons for an atom.
 
@@ -604,7 +611,7 @@ def atom_is_aromatic_one_hot(atom, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = [False, True]
     return one_hot_encoding(atom.GetIsAromatic(), allowable_set, encode_unknown)
-
+#用于检查一个原子是否属于芳香环系统。芳香环系统是指具有芳香性的环状结构
 def atom_is_aromatic(atom):
     """Get whether the atom is aromatic.
 
@@ -650,7 +657,7 @@ def atom_is_in_ring_one_hot(atom, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = [False, True]
     return one_hot_encoding(atom.IsInRing(), allowable_set, encode_unknown)
-
+#原子是否在环上
 def atom_is_in_ring(atom):
     """Get whether the atom is in ring.
 
@@ -697,12 +704,12 @@ def atom_chiral_tag_one_hot(atom, allowable_set=None, encode_unknown=False):
     atom_chirality_type_one_hot
     """
     if allowable_set is None:
-        allowable_set = [Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
-                         Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
-                         Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW,
-                         Chem.rdchem.ChiralType.CHI_OTHER]
+        allowable_set = [Chem.rdchem.ChiralType.CHI_UNSPECIFIED,              #未指定的立体化学标记。通常表示该原子不是立体中心或立体化学配置未被定义。
+                         Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,           #表示原子是一个四面体立体化学中心，配置为反时针（Counterclockwise，通常表示 S 配置）。
+                         Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW,          #表示原子是一个四面体立体化学中心，配置为顺时针（Clockwise，通常表示 R 配置）。
+                         Chem.rdchem.ChiralType.CHI_OTHER]                    #用于处理不符合常规四面体立体化学标记（如 CHI_TETRAHEDRAL_CW 或 CHI_TETRAHEDRAL_CCW）的特殊情况。
     return one_hot_encoding(atom.GetChiralTag(), allowable_set, encode_unknown)
-
+#atom.GetChiralTag() 获取原子的立体化学标记。
 def atom_chirality_type_one_hot(atom, allowable_set=None, encode_unknown=False):
     """One hot encoding for the chirality type of an atom.
 
@@ -726,12 +733,15 @@ def atom_chirality_type_one_hot(atom, allowable_set=None, encode_unknown=False):
     one_hot_encoding
     atom_chiral_tag_one_hot
     """
-    if not atom.HasProp('_CIPCode'):
+    if not atom.HasProp('_CIPCode'): #这行代码检查原子是否具有 _CIPCode 属性。 _CIPCode 是用于表示立体化学配置的属性，通常是 R 或 S。
         return [False, False]
 
     if allowable_set is None:
         allowable_set = ['R', 'S']
     return one_hot_encoding(atom.GetProp('_CIPCode'), allowable_set, encode_unknown)
+#获取属性值：通过 atom.GetProp('_CIPCode') 获取原子的 _CIPCode 属性值。
+#调用 one_hot_encoding 函数：将获取的 _CIPCode 属性值、allowable_set 和 encode_unknown 参数传递给 one_hot_encoding 函数，返回该原子的 one-hot 编码。
+
 
 def atom_mass(atom, coef=0.01):
     """Get the mass of an atom and scale it.
@@ -749,9 +759,9 @@ def atom_mass(atom, coef=0.01):
         List containing one float only.
     """
     return [atom.GetMass() * coef]
-
+#atom.GetMass() * coef 这一表达式通常是为了调整或加权原子的质量，
 def atom_is_chiral_center(atom):
-    """Get whether the atom is chiral center
+    """Get whether the atom is chiral center #要确定一个原子是否是手性中心（chiral center），需要检查该原子的立体化学属性。
 
     Parameters
     ----------
@@ -764,9 +774,12 @@ def atom_is_chiral_center(atom):
         List containing one bool only.
     """
     return [atom.HasProp('_ChiralityPossible')]
+#HasProp: 这是一个方法，用于检查原子是否具有特定的属性。它接受一个属性名称作为参数，并返回一个布尔值，指示该属性是否存在。
+#'_ChiralityPossible': 这是一个特定的属性名称。它的作用是标记原子是否可能是一个手性中心。
 
 class ConcatFeaturizer(object):
     """Concatenate the evaluation results of multiple functions as a single feature.
+    #将多个函数的特征结果连接（concatenate）成为一个单一的特征（feature）。
 
     Parameters
     ----------
@@ -775,7 +788,8 @@ class ConcatFeaturizer(object):
         particular data type, e.g. ``rdkit.Chem.rdchem.Atom``. Each function is of signature
         ``func(data_type) -> list of float or bool or int``. The resulting order of
         the features will follow that of the functions in the list.
-
+#计算分子描述符的函数列表，这些函数作用于相同特定数据类型的对象，例如 rdkit.Chem.rdchem.Atom。
+#每个函数的签名为 func(data_type) -> list of float or bool or int。结果特征的顺序将遵循函数列表中的顺序。
     Examples
     --------
 
@@ -811,6 +825,15 @@ class ConcatFeaturizer(object):
                   [1., 0., 0., 0., 0.],
                   [1., 0., 0., 0., 0.]])}
     """
+#列表中的每个函数都需要接受 x 作为输入，并返回一个包含浮点数、布尔值或整数的列表。这些函数可能用于提取不同的分子描述符或特征。
+#使用示例：
+#如果 self.func_list 包含函数 func1（计算分子的原子数）和 func2（计算分子的键数），那么：
+#func1(x) 可能返回 [6]（代表分子中有 6 个原子）。
+#func2(x) 可能返回 [5]（代表分子中有 5 个键）。
+#通过 [func(x) for func in self.func_list]，你得到 [[6], [5]]。
+#itertools.chain.from_iterable 会将这些列表合并成 [6, 5]。
+#最终，list(...) 会将其转换为 [6, 5] 作为函数的返回结果。
+
     def __init__(self, func_list):
         self.func_list = func_list
 
@@ -823,21 +846,23 @@ class ConcatFeaturizer(object):
             Data to featurize.
 
         Returns
+        #x 是你要传递给函数列表中每个函数的数据。在上面的示例中，x 是一个 RDKit 的分子对象。它可能是任何你希望传递给这些函数的对象，具体取决于函数的预期输入类型
         -------
         list
             List of feature values, which can be of type bool, float or int.
         """
         return list(itertools.chain.from_iterable(
             [func(x) for func in self.func_list]))
+#itertools.chain.from_iterable 是 itertools 模块中的一个函数，用于将一个可迭代对象（这里是一个包含列表的列表）扁平化成一个单一的迭代器。
 
 class BaseAtomFeaturizer(object):
-    """An abstract class for atom featurizers.
+    """An abstract class for atom featurizers. #一个用于原子特征化的抽象类
 
     Loop over all atoms in a molecule and featurize them with the ``featurizer_funcs``.
-
+#遍历分子中的所有原子，并使用 featurizer_funcs 对它们进行特征化
     **We assume the resulting DGLGraph will not contain any virtual nodes and a node i in the
     graph corresponds to exactly atom i in the molecule.**
-
+#我们假设生成的 DGLGraph 不会包含虚拟节点，并且图中的节点 i 正好对应分子中的第 i 个原子
     Parameters
     ----------
     featurizer_funcs : dict
@@ -846,7 +871,11 @@ class BaseAtomFeaturizer(object):
     feat_sizes : dict
         Mapping feature name to the size of the corresponding feature. If None, they will be
         computed when needed. Default: None.
-
+#featurizer_funcs : dict
+#特征名称与特征化函数的映射。
+#每个函数的签名为 func(rdkit.Chem.rdchem.Atom) -> list 或 1D numpy 数组。
+#feat_sizes : dict
+#特征名称与相应特征大小的映射。如果为 None，将在需要时计算它们。默认值：None。
     Examples
     --------
 
@@ -913,6 +942,9 @@ class BaseAtomFeaturizer(object):
 
         return self._feat_sizes[feat_name]
 
+#确保 feat_name 是有效的，并且是 self.featurizer_funcs 中定义的特征名称。
+#如果 feat_name 没有指定，但特征化函数字典中只有一个函数，则自动选择该函数的名称。
+#如果 feat_name 对应的特征大小尚未计算，则使用示例原子计算特征的大小，并缓存结果。最终返回特征的大小。
     def __call__(self, mol):
         """Featurize all atoms in a molecule.
 
@@ -928,20 +960,25 @@ class BaseAtomFeaturizer(object):
             feature under the key ``k``. Each feature is a tensor of dtype float32 and shape
             (N, M), where N is the number of atoms in the molecule.
         """
-        num_atoms = mol.GetNumAtoms()
+        num_atoms = mol.GetNumAtoms() #原子总数
         atom_features = defaultdict(list)
 
         # Compute features for each atom
         for i in range(num_atoms):
-            atom = mol.GetAtomWithIdx(i)
+            atom = mol.GetAtomWithIdx(i)  #atom = mol.GetAtomWithIdx(i) 这行代码从一个 RDKit 分子对象 mol 中根据索引 i 获取对应的原子对象。这是处理分子结构时常用的方法，可以用于提取和分析分子中的每个原子信息。
             for feat_name, feat_func in self.featurizer_funcs.items():
                 atom_features[feat_name].append(feat_func(atom))
-
-        # Stack the features and convert them to float arrays
+#对于每个特征名称和特征化函数，使用 feat_func 函数计算原子的特征。将计算结果附加到 atom_features[feat_name] 中。
+#atom_features 是一个字典，其键是特征名称，值是一个列表，用于存储该特征的所有原子特征。假设 atom_features 已经被初始化为包含每个特征名称的空列表。
+        # Stack the features and convert them to float arrays  #代码的目的是将存储在 atom_features 字典中的原子特征转换为一个处理后的特征字典 processed_features
         processed_features = dict()
         for feat_name, feat_list in atom_features.items():
             feat = np.stack(feat_list)
+            #arrays: 需要堆叠的数组序列。所有的数组必须具有相同的形状，axis: 堆叠的轴。默认是 0，即沿着第一个轴堆叠。
             processed_features[feat_name] = F.zerocopy_from_numpy(feat.astype(np.float32))
+            
+#F.zerocopy_from_numpy 是 DGL 库中 dgl.backend 模块的一个函数，用于将 NumPy 数组转换为 DGL 张量（tensor），并确保转换过程中不进行数据复制。这种方式可以提高效率，特别是在数据量较大时。
+
 
         return processed_features
 
@@ -1027,7 +1064,8 @@ class CanonicalAtomFeaturizer(BaseAtomFeaturizer):
 
 class WeaveAtomFeaturizer(object):
     """Atom featurizer in Weave.
-
+#在“分子图卷积：超越指纹（Molecular Graph Convolutions: Moving Beyond Fingerprints）”一文中，
+#涉及到的 原子特征化 是指将分子中的原子属性和特征转换为可以用于机器学习模型的数值格式的过程
     The atom featurization performed in `Molecular Graph Convolutions: Moving Beyond Fingerprints
     <https://arxiv.org/abs/1603.00856>`__, which considers:
 
@@ -1103,8 +1141,8 @@ class WeaveAtomFeaturizer(object):
         self._atom_types = atom_types
 
         if chiral_types is None:
-            chiral_types = [Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
-                            Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW]
+            chiral_types = [Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW, #手性中心的顺时针（CW）
+                            Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW] #逆时针（CCW）排列决定了其具体的立体化学性质。
         self._chiral_types = chiral_types
 
         if hybridization_types is None:
@@ -1122,7 +1160,16 @@ class WeaveAtomFeaturizer(object):
 
         fdef_name = osp.join(RDConfig.RDDataDir, "BaseFeatures.fdef")
         self._mol_featurizer = ChemicalFeatures.BuildFeatureFactory(fdef_name)
+#fdef_name = osp.join(RDConfig.RDDataDir, "BaseFeatures.fdef")：
+#osp.join 是 os.path.join 的缩写，它用于生成一个文件路径。
+#RDConfig.RDDataDir 是 RDKit 配置中的一个变量，指向 RDKit 数据文件的目录。
+#"BaseFeatures.fdef" 是一个定义了化学特征的文件名。它包含了如何识别和定义分子中的特征（例如，官能团、环等）
 
+#self._mol_featurizer = ChemicalFeatures.BuildFeatureFactory(fdef_name)：
+
+#ChemicalFeatures 是 RDKit 中一个模块，提供了处理化学特征的功能。
+#BuildFeatureFactory 是 ChemicalFeatures 模块中的一个方法，它接受一个特征定义文件的路径（如 fdef_name），并返回一个“特征工厂”（Feature Factory）对象。
+#特征工厂对象可以用来从分子中提取特征，这些特征是基于 BaseFeatures.fdef 文件中的定义。特征提取是将化学信息转化为可用于机器学习或其他计算分析的格式的过程。
     def feat_size(self):
         """Get the feature size.
 
@@ -1133,7 +1180,10 @@ class WeaveAtomFeaturizer(object):
         """
         mol = Chem.MolFromSmiles('C')
         feats = self(mol)[self._atom_data_field]
-
+        
+#这里的 self(mol) 表示你在某个类中定义了一个 __call__ 方法，使得这个类的实例可以像函数一样被调用。self(mol) 会处理分子 mol 并返回某些结果。
+#[self._atom_data_field] 表示从上述结果中提取特定的字段。self._atom_data_field 是一个类属性，指示要从结果中提取的数据字段。通常，它会是一个字符串，指定了你感兴趣的特征数据字段。
+#feats 变量保存了从分子 mol 中提取的特征数据，特征数据是基于 self._atom_data_field 指定的字段。
         return feats.shape[-1]
 
     def get_donor_acceptor_info(self, mol_feats):
@@ -1486,7 +1536,7 @@ def bond_type_one_hot(bond, allowable_set=None, encode_unknown=False):
     return one_hot_encoding(bond.GetBondType(), allowable_set, encode_unknown)
 
 def bond_is_conjugated_one_hot(bond, allowable_set=None, encode_unknown=False):
-    """One hot encoding for whether the bond is conjugated.
+    """One hot encoding for whether the bond is conjugated. #键是否共轭
 
     Parameters
     ----------
@@ -1511,7 +1561,7 @@ def bond_is_conjugated_one_hot(bond, allowable_set=None, encode_unknown=False):
     if allowable_set is None:
         allowable_set = [False, True]
     return one_hot_encoding(bond.GetIsConjugated(), allowable_set, encode_unknown)
-
+#bond.GetIsConjugated() 是 RDKit 库中的一个方法，用于确定化学键是否为共轭键
 def bond_is_conjugated(bond):
     """Get whether the bond is conjugated.
 
@@ -1579,7 +1629,11 @@ def bond_is_in_ring(bond):
 
 def bond_stereo_one_hot(bond, allowable_set=None, encode_unknown=False):
     """One hot encoding for the stereo configuration of a bond.
-
+    
+#在化学中，立体化学配置（Stereo Configuration）指的是分子中手性中心或立体异构体的三维空间排列。对于化学键，立体化学配置可以包括：
+#顺式（Cis）与反式（Trans）：在一些含有双键的分子中，描述取代基的空间关系。
+#R和S：用于描述手性中心的立体异构体。
+#E和Z：描述双键两侧取代基的空间关系
     Parameters
     ----------
     bond : rdkit.Chem.rdchem.Bond
@@ -1603,16 +1657,17 @@ def bond_stereo_one_hot(bond, allowable_set=None, encode_unknown=False):
     one_hot_encoding
     """
     if allowable_set is None:
-        allowable_set = [Chem.rdchem.BondStereo.STEREONONE,
-                         Chem.rdchem.BondStereo.STEREOANY,
-                         Chem.rdchem.BondStereo.STEREOZ,
-                         Chem.rdchem.BondStereo.STEREOE,
-                         Chem.rdchem.BondStereo.STEREOCIS,
-                         Chem.rdchem.BondStereo.STEREOTRANS]
+        allowable_set = [Chem.rdchem.BondStereo.STEREONONE,                #无立体化学配置
+                         Chem.rdchem.BondStereo.STEREOANY,                 #任何立体配置
+                         Chem.rdchem.BondStereo.STEREOZ,                   #Z 配置（在双键上，两个高优先级取代基在同一侧）
+                         Chem.rdchem.BondStereo.STEREOE,                   #E 配置（在双键上，两个高优先级取代基在不同侧）
+                         Chem.rdchem.BondStereo.STEREOCIS,                 #顺式配置（通常用于描述双键的取代基）
+                         Chem.rdchem.BondStereo.STEREOTRANS]               #反式配置（与顺式相对）
     return one_hot_encoding(bond.GetStereo(), allowable_set, encode_unknown)
+#bond.GetStereo()：获取的立体配置值。
 
 def bond_direction_one_hot(bond, allowable_set=None, encode_unknown=False):
-    """One hot encoding for the direction of a bond.
+    """One hot encoding for the direction of a bond.  #键的方向性
 
     Parameters
     ----------
@@ -1635,10 +1690,11 @@ def bond_direction_one_hot(bond, allowable_set=None, encode_unknown=False):
     one_hot_encoding
     """
     if allowable_set is None:
-        allowable_set = [Chem.rdchem.BondDir.NONE,
-                         Chem.rdchem.BondDir.ENDUPRIGHT,
-                         Chem.rdchem.BondDir.ENDDOWNRIGHT]
+        allowable_set = [Chem.rdchem.BondDir.NONE,                                         #没有特定的方向信息。
+                         Chem.rdchem.BondDir.ENDUPRIGHT,                                   #键的方向朝上或右上。
+                         Chem.rdchem.BondDir.ENDDOWNRIGHT]                                 #键的方向朝下或右下。
     return one_hot_encoding(bond.GetBondDir(), allowable_set, encode_unknown)
+#bond.GetBondDir()：获取的化学键方向值。
 
 class BaseBondFeaturizer(object):
     """An abstract class for bond featurizers.
@@ -1649,7 +1705,10 @@ class BaseBondFeaturizer(object):
 
     **We assume the resulting DGLGraph will be created with :func:`smiles_to_bigraph` without
     self loops.**
-
+#“”"一个用于键特征化的抽象类。
+#循环遍历分子中的所有键，并使用 featurizer_funcs 对它们进行特征化。
+#我们假设构造的 DGLGraph 是一个双向图，其中分子中的第 i 条键，即 mol.GetBondWithIdx(i)，对应于 DGLGraph 中的第 (2i) 和 (2i+1) 条边。
+#我们假设生成的 DGLGraph 将通过 :func:smiles_to_bigraph 创建，并且没有自环。
     Parameters
     ----------
     featurizer_funcs : dict
@@ -1662,6 +1721,15 @@ class BaseBondFeaturizer(object):
         Whether self loops will be added. Default to False. If True, it will use an additional
         column of binary values to indicate the identity of self loops in each bond feature.
         The features of the self loops will be zero except for the additional columns.
+
+#featurizer_funcs : dict
+#特征名称与特征化函数的映射。
+#每个函数的签名为 func(rdkit.Chem.rdchem.Bond) -> list 或 1D numpy 数组。
+#feat_sizes : dict
+#特征名称与相应特征大小的映射。如果为 None，则在需要时计算。默认值：None。
+#self_loop : bool
+#是否会添加自环。默认为 False。如果为 True，它将使用一列二进制值来指示每个键特征中的自环标识。
+#自环的特征将为零，除了额外的列以外。
 
     Examples
     --------
@@ -1750,7 +1818,7 @@ class BaseBondFeaturizer(object):
 
         mol = Chem.MolFromSmiles('CCO')
         feats = self(mol)
-
+#self(mol):当你在一个类的方法内部使用 self(mol) 时，实际上是在调用当前类实例的 __call__ 方法。__call__ 是 Python 的特殊方法，它允许类的实例像函数一样被调用
         return feats[feat_name].shape[1]
 
     def __call__(self, mol):
@@ -1770,7 +1838,9 @@ class BaseBondFeaturizer(object):
         """
         num_bonds = mol.GetNumBonds()
         bond_features = defaultdict(list)
-
+#defaultdict 是 Python 的 collections 模块中的一个类，用于创建带有默认值的字典。与普通字典不同，defaultdict 在访问不存在的键时不会抛出 KeyError 异常，而是自动创建一个默认值。
+#在这里，defaultdict(list) 表示每个新的键都会被初始化为一个空列表 []。
+#可是list是啥？？？
         # Compute features for each bond
         for i in range(num_bonds):
             bond = mol.GetBondWithIdx(i)
