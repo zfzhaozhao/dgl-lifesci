@@ -21,6 +21,7 @@ try:
     from rdkit.Chem import AllChem, ChemicalFeatures
 except ImportError:
     pass
+#__all__ 是 Python 中一个特殊的变量，主要用于模块的导入控制。当你在一个模块中定义 __all__ 变量时，它通常是一个包含字符串的列表，列出了该模块希望公开的属性和方法。
 
 __all__ = ['one_hot_encoding',
            'atom_type_one_hot',
